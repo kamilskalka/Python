@@ -41,6 +41,7 @@ class Graph():
 
 		self.printSolution(dist)
 
+
 # Driver program
 g = Graph(9)
 g.graph = [[0, 4, 0, 0, 0, 0, 0, 8, 0],
@@ -55,5 +56,3 @@ g.graph = [[0, 4, 0, 0, 0, 0, 0, 8, 0],
 		]
 
 g.dijkstra(0)
-
-# This code is contributed by Divyanshu Mehta

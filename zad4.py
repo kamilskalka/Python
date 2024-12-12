@@ -1,85 +1,65 @@
 #Zaimplementowac algorytm Aho-Corasick
 
-class TrieNode:
+class Node:
     def __init__(self):
-        # Initialize TrieNode attributes
-        self.children = {}
-        self.output = []
-        self.fail = None
+        self.links = {}
+        self.patterns = []
+        self.fail_link = None
 
 
-def build_automaton(keywords):
-    # Initialize root node of the trie
-    root = TrieNode()
+def create_automaton(patterns):
+    root = Node()
 
-    # Build trie
-    for keyword in keywords:
-        node = root
-        # Traverse the trie and create nodes for each character
-        for char in keyword:
-            node = node.children.setdefault(char, TrieNode())
-        # Add keyword to the output list of the final node
-        node.output.append(keyword)
+    for pattern in patterns:
+        current_node = root
+        for char in pattern:
+            current_node = current_node.links.setdefault(char, Node())
+        current_node.patterns.append(pattern)
 
-    # Build failure links using BFS
     queue = []
-    # Start from root's children
-    for node in root.children.values():
+    for node in root.links.values():
         queue.append(node)
-        node.fail = root
+        node.fail_link = root
 
-    # Breadth-first traversal of the trie
     while queue:
         current_node = queue.pop(0)
-        # Traverse each child node
-        for key, next_node in current_node.children.items():
+        for key, next_node in current_node.links.items():
             queue.append(next_node)
-            fail_node = current_node.fail
-            # Find the longest proper suffix that is also a prefix
-            while fail_node and key not in fail_node.children:
-                fail_node = fail_node.fail
-            # Set failure link of the current node
-            next_node.fail = fail_node.children[key] if fail_node else root
-            # Add output patterns of failure node to current node's output
-            next_node.output += next_node.fail.output
+            fail_node = current_node.fail_link
+            while fail_node and key not in fail_node.links:
+                fail_node = fail_node.fail_link
+            next_node.fail_link = fail_node.links[key] if fail_node else root
+            next_node.patterns += next_node.fail_link.patterns
 
     return root
 
 
-def search_text(text, keywords):
-    # Build the Aho-Corasick automaton
-    root = build_automaton(keywords)
-    # Initialize result dictionary
-    result = {keyword: [] for keyword in keywords}
+def find_patterns(text, patterns):
+    root = create_automaton(patterns)
+    matches = {pattern: [] for pattern in patterns}
 
     current_node = root
-    # Traverse the text
-    for i, char in enumerate(text):
-        # Follow failure links until a match is found
-        while current_node and char not in current_node.children:
-            current_node = current_node.fail
+    for idx, char in enumerate(text):
+        while current_node and char not in current_node.links:
+            current_node = current_node.fail_link
 
         if not current_node:
             current_node = root
             continue
 
-        # Move to the next node based on current character
-        current_node = current_node.children[char]
-        # Record matches found at this position
-        for keyword in current_node.output:
-            result[keyword].append(i - len(keyword) + 1)
+        current_node = current_node.links[char]
+        for pattern in current_node.patterns:
+            matches[pattern].append(idx - len(pattern) + 1)
 
-    return result
+    return matches
 
 
-# Example 1
 text1 = "dfhlsfdsfdalsfdalhfsdaasdlewqtpg98go;iadfhblifdsuhtpeetrulhgsgdjkhlsdhkgkgfk"
-arr1 = ["df", "ls"]
-result1 = search_text(text1, arr1)
+patterns1 = ["df", "ls"]
+result1 = find_patterns(text1, patterns1)
 print(result1)
 
-# Example 2
 text2 = "abxabcabcabyasdbasdajsdausdtyasdavsdasidasydasghdasdjasjdajsdjasjdastdavsdasdajdajsdjadjasd"
-arr2 = ["ab", "abc", "aby","asd"]
-result2 = search_text(text2, arr2)
+patterns2 = ["ab", "abc", "aby", "asd"]
+result2 = find_patterns(text2, patterns2)
 print(result2)

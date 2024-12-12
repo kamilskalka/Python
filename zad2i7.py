@@ -31,7 +31,7 @@ class PersonalData:
             data = json.load(f)
         return cls(data["name"], data["surname"], data["postalcode"], data["address"], data["pesel"])
 
-person1 = PersonalData("Jan", "Kowalski", "00-000", "ul. Piękna 10, Warszawa", "12345678901")
+person1 = PersonalData("Adam", "Kowalski", "11-100", "ul. Smocza 15, Warszawa", "12345678901")
 person1.save_to_json("person1.json")
 
 person2 = PersonalData.load_from_json("person1.json")
